@@ -40,9 +40,8 @@ var player = videojs('player', {
 
 player.ready( () => {
 	socket.emit('playerMsg','ready')
-	setTimeout(()=>{
-		player.src('http://127.0.0.1:8000/testVideo1.mp4')
-		//player.src('http://127.0.0.1:9999/qqq296.mp4')	
-	},2000)
+	player.src('http://www.html5videoplayer.net/videos/toystory.mp4')
+	//player.src('http://127.0.0.1:8000/testVideo1.mp4')
+	//player.src('http://127.0.0.1:9999/qqq296.mp4')	
 	
 })

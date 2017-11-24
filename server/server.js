@@ -1,7 +1,9 @@
-var app = require('express')();
+var express = require('express')
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var fs = require('fs')
+var path = require('path');
 
 server.listen(8000);
 
@@ -12,49 +14,60 @@ function toClient(msg,data) {
 		console.log('toClient: null')
 		return
 	}
-		
+
 	clientSocket.emit(msg,data)
 }
 
-// var filePath = '/Users/raymond/temp/qqq296.mp4'
-// var stat = fileSystem.statSync(filePath)
-// var readStream = fileSystem.createReadStream(filePath)
-//console.log('file size:'+stat.size)
+app.get('/player', (req,res) => {
+	res.sendFile(path.resolve(__dirname+'/../client/player.html'));
+})
+app.get('/poster.jpg', (req,res) => {
+	res.sendFile(path.resolve(__dirname+'/../client/poster.jpg'));
+})
+app.get('/player.js', (req,res) => {
+	res.sendFile(path.resolve(__dirname+'/../client/player.js'));
+})
+
+app.get('/controller', (req,res) => {
+	res.sendFile(path.resolve(__dirname+'/../client/controller.html'));
+})
+
 
 app.get('/testVideo1.mp4', (req,res) => {
+	//ref: https://medium.com/@daspinola/video-stream-with-node-js-and-html5-320b3191a6b6
 	console.log(req.headers)
 	const path = '/Users/raymond/temp/qqq296.mp4'
-  const stat = fs.statSync(path)
-  const fileSize = stat.size
-  const range = req.headers.range
-  if (range) {
-    const parts = range.replace(/bytes=/, "").split("-")
-    const start = parseInt(parts[0], 10)
-    const end = parts[1] 
-      ? parseInt(parts[1], 10)
-      : fileSize-1
-    const chunksize = (end-start)+1
-    const file = fs.createReadStream(path, {start, end})
-    const head = {
-      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': chunksize,
-      'Content-Type': 'video/mp4',
-    }
-    res.writeHead(206, head);
-    file.pipe(res);
-  } else {
-    const head = {
-      'Content-Length': fileSize,
-      'Content-Type': 'video/mp4',
-    }
-    res.writeHead(200, head)
-    fs.createReadStream(path).pipe(res)
-  }
+	const stat = fs.statSync(path)
+	const fileSize = stat.size
+	const range = req.headers.range
+	if (range) {
+		const parts = range.replace(/bytes=/, "").split("-")
+		const start = parseInt(parts[0], 10)
+		const end = parts[1] 
+		? parseInt(parts[1], 10)
+		: fileSize-1
+		const chunksize = (end-start)+1
+		const file = fs.createReadStream(path, {start, end})
+		const head = {
+			'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+			'Accept-Ranges': 'bytes',
+			'Content-Length': chunksize,
+			'Content-Type': 'video/mp4',
+		}
+		res.writeHead(206, head);
+		file.pipe(res);
+	} else {
+		const head = {
+			'Content-Length': fileSize,
+			'Content-Type': 'video/mp4',
+		}
+		res.writeHead(200, head)
+		fs.createReadStream(path).pipe(res)
+	}
 })
 
 app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
+	res.sendfile(__dirname + '/index.html');
 })
 
 app.get('/load', (req,res) => {
